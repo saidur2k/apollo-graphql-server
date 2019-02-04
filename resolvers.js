@@ -1,3 +1,6 @@
+const { PubSub } = require('apollo-server');
+const pubsub = new PubSub();
+
 let products = [];
 
 const getProducts = () => {
@@ -13,13 +16,21 @@ const createProduct = ({ product}) => {
     products = [ ...products, { ...product, id: newId}];
     return Promise.resolve(product)
 }
-
+const PRODUCT_CREATED = 'PRODUCT_CREATED';
 module.exports = {
     Query: {
         products: async () => getProducts(),
         product: async (_, { id }) => getProductById({ productId: id })
     },
     Mutation: {
-        createProduct: async (_, { product }) => createProduct({ product })
+        createProduct: async (_, { product }) => {
+            pubsub.publish(PRODUCT_CREATED, { productCreated: product });
+            return createProduct({ product })
+        }
+    },
+    Subscription: {
+        productCreated: {
+          subscribe: () => pubsub.asyncIterator([PRODUCT_CREATED]),
+        }
     }
 };

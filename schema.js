@@ -21,6 +21,10 @@ const typeDefs = gql`
     login(email: String): String,
     createProduct(product: ProductInput): Product
   }
+
+  type Subscription {
+      productCreated: Product
+   }
 `;
 
 module.exports = typeDefs;
